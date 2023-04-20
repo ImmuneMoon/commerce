@@ -4,6 +4,7 @@
     <h2>Create A Listing</h2>
     <div>
         <form id="new-listing" action={% url 'auctions:new_listing' %} method="POST">
+            {% csrf_token %}
             <div class="ml-3 my-4">
                 <div class="d-flex">
                     <div id="label-container" class="d-flex flex-column">
