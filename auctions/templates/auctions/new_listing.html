@@ -1,0 +1,70 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Create A Listing</h2>
+    <div>
+        <form id="new-listing" action={% url 'auctions:new_listing' %} method="POST">
+            <div class="ml-3 my-4">
+                <div class="d-flex">
+                    <div id="label-container" class="d-flex flex-column">
+                        <label class="mb-3" for="title">Title:</label>
+
+                        <label class="mb-3" for="info">Info:</label>
+
+                        <label class="mb-3" for="image">Image URL:</label>
+
+                        <label class="mb-3" for="price">Price:</label>
+
+                        <label class="mb-3" for="category">Category:</label>
+                    </div>
+                    <div id="input-container" class="d-flex flex-column ml-5">
+                        <input class="my-1" type="text" name="title" required="">
+
+                        <input class="my-1" type="text" name="info" required="">
+
+                        <input class="my-1" type="text" name="image" required="">
+
+                        <input class="my-1" type="number" step="any" name="price" required="">
+
+                        <div class="my-1 d-flex">
+                            <select id="cat-select" name="category" required="">
+                                {% for item in categories %}
+                                <option>{{ item }}</option>
+                                {% endfor %}
+                            </select>
+                            <input id="cat-add" type="text" name="category">
+                            <button id="add-bttn" class="btn btn-link" type="button">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ml-3">
+                <button class="btn btn-success" type="submit">Save</button>
+                <button class="btn btn-success" type="submit">Save and add another</button>
+                <button class="btn btn-danger" type="submit">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        function toggleCategory() {
+            const select = document.getElementById("cat-select");
+            const add = document.getElementById("cat-add");
+            const addBttn = document.getElementById("add-bttn");
+            if (add.style.display === "none") {
+                select.style.display = "none";
+                add.style.display = "block";
+                addBttn.innerHTML = "Cancel";
+            } else {
+                select.style.display = "block";
+                add.style.display = "none";
+                addBttn.innerHTML = "Add";
+            }
+        }
+        document.getElementById("add-bttn").addEventListener("click", toggleCategory);
+        const add = document.getElementById("cat-add");
+        const cancel = document.getElementById("cancel-bttn");
+        add.style.display = "none";
+
+    </script>
+        
+{% endblock %}
