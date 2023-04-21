@@ -23,17 +23,17 @@
 
                         <input class="my-1" type="text" name="info" required="">
 
-                        <input class="my-1" type="text" name="image" required="">
+                        <input class="my-1" type="" name="image" required="">
 
                         <input class="my-1" type="number" step="any" name="price" required="">
 
                         <div class="my-1 d-flex">
                             <select id="cat-select" name="category" required="">
                                 {% for item in categories %}
-                                <option>{{ item }}</option>
+                                <option value={{ item }}>{{ item }}</option>
                                 {% endfor %}
                             </select>
-                            <input id="cat-add" type="text" name="category">
+                            <input id="cat-add" type="text" name="new-category">
                             <button id="add-bttn" class="btn btn-link" type="button">Add</button>
                         </div>
                     </div>

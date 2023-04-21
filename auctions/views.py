@@ -74,15 +74,23 @@ def new_listing(request):
         info = request.POST["info"]
         image = request.POST["image"]
         price = request.POST["price"]
-        category = request.POST["category"]
+        category = ""
+        categorySelect = request.POST["category"]
+        newCategory = request.POST["new-category"]
+        if newCategory != "":
+            category = newCategory
+        else:
+            category = categorySelect
+        categoryData = Category.objects.get(categoryName = category)
+        print('category',category)
         createListing = Listing(
             title = title,
             info = info,
             imageURL = image,
             price = float(price),
             user = user,
-            category = category
+            category = categoryData
         )
         createListing.save()
-        return HttpResponseRedirect(reverse(index))
+        return HttpResponseRedirect(reverse("auctions:index"))
         
