@@ -6,6 +6,9 @@ from django.urls import reverse
 
 from .models import User, Listing, Category
 
+import sqlite3
+
+db = sqlite3.connect('db.sqlite3')
 
 def index(request):
     return render(request, "auctions/index.html")
@@ -79,10 +82,10 @@ def new_listing(request):
         newCategory = request.POST["new-category"]
         if newCategory != "":
             category = newCategory
+            Category.objects.create(categoryName = category)
         else:
             category = categorySelect
         categoryData = Category.objects.get(categoryName = category)
-        print('category',category)
         createListing = Listing(
             title = title,
             info = info,
@@ -93,4 +96,3 @@ def new_listing(request):
         )
         createListing.save()
         return HttpResponseRedirect(reverse("auctions:index"))
-        
