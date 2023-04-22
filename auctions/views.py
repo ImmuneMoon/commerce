@@ -11,7 +11,11 @@ import sqlite3
 db = sqlite3.connect('db.sqlite3')
 
 def index(request):
-    return render(request, "auctions/index.html")
+    # Grabs active listings and displays them if any exist
+    activeListings = Listing.objects.filter(active=True)
+    return render(request, "auctions/index.html", {
+        "activeListings" : activeListings
+    })
 
 
 def login_view(request):
@@ -66,12 +70,15 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def new_listing(request):
+    # Renders the listing page on GET
     if request.method == 'GET':
         categories = Category.objects.all()
         return render(request, 'auctions/new_listing.html', {
             'categories' : categories
         })
+    # Submits the form on POST
     else:
+        # Gets the user, and form info
         user = request.user
         title = request.POST["title"]
         info = request.POST["info"]
@@ -80,19 +87,36 @@ def new_listing(request):
         category = ""
         categorySelect = request.POST["category"]
         newCategory = request.POST["new-category"]
-        if newCategory != "":
-            category = newCategory
-            Category.objects.create(categoryName = category)
+        # Server check for empty fields
+        if title == '' or info =='' or image =='' or price == '':
+            return render(request, "auctions/error.html", {
+                "error": "Please complete all fields."
+            })
+        # If no empty fields
         else:
-            category = categorySelect
-        categoryData = Category.objects.get(categoryName = category)
-        createListing = Listing(
-            title = title,
-            info = info,
-            imageURL = image,
-            price = float(price),
-            user = user,
-            category = categoryData
-        )
-        createListing.save()
-        return HttpResponseRedirect(reverse("auctions:index"))
+            # Checks if the user created a new category and adds the category if they did
+            if newCategory != "":
+                category = newCategory
+                Category.objects.create(categoryName = category)
+            else:
+                category = categorySelect
+            # Fetches the category and creates the listing
+            categoryData = Category.objects.get(categoryName = category)
+            createListing = Listing(
+                title = title,
+                info = info,
+                imageURL = image,
+                price = float(price),
+                user = user,
+                category = categoryData
+            )
+            # Saves the listing to the database
+            createListing.save() 
+            # Checks whether the user indicated if they want to make another listing or not
+            button_value = request.POST.get('button')
+            if button_value == 'save':
+                # If they didnt, theyre redirected to index
+                return HttpResponseRedirect(reverse("auctions:index"))
+            elif button_value == 'add-another':
+                # If they did, the new listing page is rendered again
+                return HttpResponseRedirect(reverse("auctions:new_listing"))
