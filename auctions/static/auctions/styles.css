@@ -2,6 +2,10 @@ body {
     padding: 10px;
 }
 
+#place-bid {
+    width:fit-content;
+}
+
 #new-listing {
     width: 30rem;
 }

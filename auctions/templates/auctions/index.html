@@ -7,7 +7,7 @@
 
         <div class="card">
             <div class="card-header">
-                <h3><a href="{% url 'auctions:listing' id=item.id%}">{{ item.title }}</a></h3>
+                <h3><a href="{% url 'auctions:listing' id=item.id %}">{{ item.title }}</a></h3>
             </div>
             <div id="listing-card-body" class="card-body">
                 <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
@@ -22,7 +22,8 @@
                 </ul>
             </div>
           </div>
+          <br>
 
     {% endfor %}
-    
+
 {% endblock %}

@@ -4,7 +4,8 @@
 
     <h2>{{ category }}</h2>
 
-    {% for item in category %}
+    {% for item in listings %}
+
         <div class="card">
             <div class="card-header">
                 <h3><a href="{% url 'auctions:listing' id=item.id%}">{{ item.title }}</a></h3>
@@ -22,6 +23,8 @@
                 </ul>
             </div>
         </div>
+        <br>
+        
     {% endfor %}
 
 {% endblock %}

@@ -129,20 +129,28 @@ def categories(request):
         'categories' : categories
     })
 
-def category(request, name):
-    categoryInfo = Listing.objects.get(category=name)
-    print('categoryInfo',categoryInfo)
+def category(request, cat):
+    print('cat', cat)
+    categoryId = Category.objects.get(categoryName=cat).id
+    categoryInfo = Listing.objects.filter(active=True, category=categoryId)
     return render(request, "auctions/category.html", {
-        "category" : categoryInfo
+        "listings" : categoryInfo,
+        "category" : cat
     })
 
 
 def listing(request, id):
     listingInfo = Listing.objects.get(pk=id)
-    print('listinginfo: ',listingInfo)
     return render(request, "auctions/listing.html", {
         "listing" : listingInfo
     })
 
 def watchlist(request):
     something=""
+
+def user(request, uid):
+    userId = User.objects.get(username=uid).id
+    userListings = Listing.objects.filter(active=True, user=userId)
+    return render(request, "auctions/user.html", {
+        "listing" : userListings
+    })
