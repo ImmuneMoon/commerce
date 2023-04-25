@@ -11,20 +11,21 @@
                 <h3><a href="{% url 'auctions:listing' id=item.id%}">{{ item.title }}</a></h3>
             </div>
             <div id="listing-card-body" class="card-body">
-                <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
-                <p class="card-text">{{ item.info }}</p>
-                <p>{{ item.price }}</p>
+                <div class="d-flex">
+                    <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
+                    <p class="card-text mx-5">{{ item.info }}</p>
+                </div>
+                <p class="m-3">{{ item.price }}</p>
             </div>
             <div class="card-footer text-muted">
                 <h4>Details</h4>
                 <ul>
-                    <li class="nav-item">Listed by: <a class="nav-link" href="">{{ item.user }}</a></li>
-                    <li class="nav-item">Category: <a class="nav-link" href="">{{ item.category }}</a></li>
+                    <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=item.user %}">{{ item.user }}</a></li>
                 </ul>
             </div>
         </div>
         <br>
-        
+
     {% endfor %}
 
 {% endblock %}

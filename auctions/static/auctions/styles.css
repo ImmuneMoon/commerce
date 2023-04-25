@@ -2,6 +2,11 @@ body {
     padding: 10px;
 }
 
+img {
+    max-width: 400px;
+    min-width: 200px;
+}
+
 #place-bid {
     width:fit-content;
 }

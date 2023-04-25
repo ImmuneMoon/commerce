@@ -69,6 +69,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 def new_listing(request):
     # Renders the listing page on GET
     if request.method == 'GET':
@@ -129,6 +130,7 @@ def categories(request):
         'categories' : categories
     })
 
+
 def category(request, cat):
     print('cat', cat)
     categoryId = Category.objects.get(categoryName=cat).id
@@ -145,12 +147,18 @@ def listing(request, id):
         "listing" : listingInfo
     })
 
+
 def watchlist(request):
-    something=""
+    if request.method == "GET":
+        return render(request, "auctions/watchlist.html")
+    else:
+        
+
 
 def user(request, uid):
     userId = User.objects.get(username=uid).id
     userListings = Listing.objects.filter(active=True, user=userId)
     return render(request, "auctions/user.html", {
-        "listing" : userListings
+        "userListings" : userListings,
+        "user" : uid
     })

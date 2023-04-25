@@ -2,26 +2,30 @@
 
 {% block body %}
 
-    <div class="card">
-        <div class="card-header">
-            <h2>{{ listing.title }}</h2>
-        </div>
-        <div id="listing-card-body" class="card-body">
-            <img src={{ listing.imageURL }} loading="lazy" alt={{ listing.title }}>
-            <p class="card-text">{{ listing.info }}</p>
-            <p>{{ listing.price }}</p>
-            <form class="d-flex flex-column">
-                <div class="input-group w-50 mw-25">
-                    <input type="number" class="form-control" step="any" required="" placeholder=" Bid">
-                    <button class="btn btn-primary" type="button">Place Bid</button>
+    <h2>{{ user }}</h2>
+
+    {% for item in userListings %}
+
+        <div class="card">
+            <div class="card-header">
+                <h3><a href="{% url 'auctions:listing' id=item.id %}">{{ item.title }}</a></h3>
+            </div>
+            <div id="listing-card-body" class="card-body">
+                <div class="d-flex">
+                    <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
+                    <p class="card-text mx-5">{{ item.info }}</p>
                 </div>
-            </form>
-        </div>
-        <div class="card-footer text-muted">
-            <h4>Details</h4>
-            <ul>
+                <p class="m-3">{{ item.price }}</p>
+            </div>
+            <div class="card-footer text-muted">
+                <h4>Details</h4>
+                <ul>
+                    <li class="nav-item">Category: <a class="nav-link" href="{% url 'auctions:category' cat=item.category %}">{{ item.category }}</a></li>
                 </ul>
+            </div>
         </div>
-      </div>
+        <br>
+
+    {% endfor %}
 
 {% endblock %}

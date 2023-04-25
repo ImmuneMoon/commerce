@@ -5,9 +5,11 @@
     <h2>Categories</h2>
 
     {% for item in categories %}
-    <ul>
-        <li value={{ item }}><a href="{% url 'auctions:category' cat=item.categoryName %}">{{ item }}<a/></li>
-    </ul>
+
+        <ul>
+            <li><a href="{% url 'auctions:category' cat=item.categoryName %}">{{ item }}<a/></li>
+        </ul>
+
     {% endfor %}
 
 {% endblock %}

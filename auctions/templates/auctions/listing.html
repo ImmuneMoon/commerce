@@ -7,9 +7,11 @@
             <h2>{{ listing.title }}</h2>
         </div>
         <div id="listing-card-body" class="card-body">
-            <img src={{ listing.imageURL }} loading="lazy" alt={{ listing.title }}>
-            <p class="card-text">{{ listing.info }}</p>
-            <p>{{ listing.price }}</p>
+            <div class="d-flex">
+                <img src={{ listing.imageURL }} loading="lazy" alt={{ listing.title }}>
+                <p class="card-text mx-5">{{ listing.info }}</p>
+            </div>
+            <p class="m-3">{{ listing.price }}</p>
             <form class="d-flex flex-column">
                 <div class="input-group w-50 mw-25">
                     <input type="number" class="form-control" step="any" required="" placeholder=" Bid">
