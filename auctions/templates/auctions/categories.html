@@ -1,0 +1,13 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Categories</h2>
+
+    {% for item in categories %}
+        <ul>
+            <li value={{ item }}><a href="{% url 'auctions:category' name=item.category %}">{{ item }}<a/></li>
+        </ul>
+    {% endfor %}
+
+{% endblock %}

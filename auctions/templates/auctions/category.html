@@ -1,10 +1,10 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
 
-    {% for item in activeListings %}
+    <h2>{{ category }}</h2>
 
+    {% for item in category %}
         <div class="card">
             <div class="card-header">
                 <h3><a href="{% url 'auctions:listing' id=item.id%}">{{ item.title }}</a></h3>
@@ -21,8 +21,7 @@
                     <li class="nav-item">Category: <a class="nav-link" href="">{{ item.category }}</a></li>
                 </ul>
             </div>
-          </div>
-
+        </div>
     {% endfor %}
-    
+
 {% endblock %}

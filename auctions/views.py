@@ -111,7 +111,8 @@ def new_listing(request):
                 category = categoryData
             )
             # Saves the listing to the database
-            createListing.save() 
+            createListing.save()
+
             # Checks whether the user indicated if they want to make another listing or not
             button_value = request.POST.get('button')
             if button_value == 'save':
@@ -120,3 +121,28 @@ def new_listing(request):
             elif button_value == 'add-another':
                 # If they did, the new listing page is rendered again
                 return HttpResponseRedirect(reverse("auctions:new_listing"))
+
+
+def categories(request):
+    categories = Category.objects.all()
+    return render(request, 'auctions/categories.html', {
+        'categories' : categories
+    })
+
+def category(request, name):
+    categoryInfo = Listing.objects.get(category=name)
+    print('categoryInfo',categoryInfo)
+    return render(request, "auctions/category.html", {
+        "category" : categoryInfo
+    })
+
+
+def listing(request, id):
+    listingInfo = Listing.objects.get(pk=id)
+    print('listinginfo: ',listingInfo)
+    return render(request, "auctions/listing.html", {
+        "listing" : listingInfo
+    })
+
+def watchlist(request):
+    something=""
