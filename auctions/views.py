@@ -1,10 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import User, Listing, Category
+from .models import User, Listing, Category, Comment
 
 import sqlite3
 
@@ -124,6 +124,7 @@ def new_listing(request):
                 return HttpResponseRedirect(reverse("auctions:new_listing"))
 
 
+# Simply pulls all the categories, then renders the categories page and passes them to the page
 def categories(request):
     categories = Category.objects.all()
     return render(request, 'auctions/categories.html', {
@@ -132,9 +133,11 @@ def categories(request):
 
 
 def category(request, cat):
-    print('cat', cat)
+    # Grabs the category id from the name given
     categoryId = Category.objects.get(categoryName=cat).id
+    # Filters for listings that are active and contain the category id
     categoryInfo = Listing.objects.filter(active=True, category=categoryId)
+    # Passes the category name and listings to the page
     return render(request, "auctions/category.html", {
         "listings" : categoryInfo,
         "category" : cat
@@ -142,23 +145,81 @@ def category(request, cat):
 
 
 def listing(request, id):
+    # Grabs the listing from the given id
     listingInfo = Listing.objects.get(pk=id)
+    # Passes the listing to the listing page
+    comments = Comment.objects.filter(listing=listingInfo)
+    print('comments', comments)
     return render(request, "auctions/listing.html", {
-        "listing" : listingInfo
+        "listing" : listingInfo,
+        "comments" : comments
     })
 
 
 def watchlist(request):
+    # Grabs the current user
+    user = request.user
+    # Pulls the users watchlist by searching listings that have the user in their watchlist
+    watch_list = Listing.objects.filter(watchList=user)
+    # Gets the current page's URL, if the current page cant be redirected to, the user is redirected to index instead
+    next_url = request.POST.get('next', 'auctions/index.html')
+    # Renders the watchlist page on GET and passes the user's list
     if request.method == "GET":
-        return render(request, "auctions/watchlist.html")
+        return render(request, "auctions/watchlist.html", {
+            "watchlist" : watch_list
+        })
     else:
-        
+        print("request", request.POST)
+        # Otherwise, the listing id is grabbed from it's invisible input
+        listingId = request.POST.get("listing-id")
+        print("listingID", listingId)
+        # The pushed button's value is grabbed from it's invisible input
+        watchBttn = request.POST.get("watch")
+        # Grabs the listing information using the id
+        listingInfo = Listing.objects.get(pk=listingId)
+        # If the "add" button was clicked
+        if watchBttn == "add":
+            # The user is added the the listing's watchlist
+            listingInfo.watchList.add(user)
+            # Redirects to the page the user is on if possible
+            return redirect(next_url)
+        elif watchBttn == "remove":
+            # The user is removed the the listing's watchlist
+            listingInfo.watchList.remove(user)
+            # Redirects to the page the user is on if possible
+            return redirect(next_url)
 
 
+# For rendering the user's profile
 def user(request, uid):
-    userId = User.objects.get(username=uid).id
-    userListings = Listing.objects.filter(active=True, user=userId)
+    # Gets the user's listings
+    userListings = Listing.objects.filter(active=True, user=uid)
+    # Gets the username from the user id
+    userName = User.objects.get(pk=uid)
     return render(request, "auctions/user.html", {
         "userListings" : userListings,
-        "user" : uid
+        "user" : userName
     })
+
+def comment(request, lstng_id):
+    next_url = request.POST.get('next', 'auctions/index.html')
+    cmmntBttn = request.POST.get("comment-bttn")
+    user = request.user
+    if cmmntBttn == "post":
+        newComment = request.POST["new-comment"]
+        listing = Listing.objects.get(id=lstng_id)
+        createComment = Comment(
+            commenter = user,
+            listing = listing,
+            comment = newComment
+        )
+        createComment.save()
+        return redirect(next_url)
+
+    elif cmmntBttn == "delete":
+        comment_id = request.POST.get("comment-id")
+        comment = Comment.objects.get(id=comment_id)
+        comment.delete()
+        return redirect(next_url)
+
+

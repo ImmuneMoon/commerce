@@ -20,12 +20,29 @@
             <div class="card-footer text-muted">
                 <h4>Details</h4>
                 <ul>
-                    <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=item.user %}">{{ item.user }}</a></li>
+                    <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=item.user.id %}">{{ item.user }}</a></li>
                     <li class="nav-item">Category: <a class="nav-link" href="{% url 'auctions:category' cat=item.category %}">{{ item.category }}</a></li>
                 </ul>
+
+                {% if user.is_authenticated and user != item.user %}
+
+                    <form action="{% url 'auctions:watchlist' %}" method="POST">
+                        {% csrf_token %}
+                        <!-- Grabs the page path -->
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <!-- Grabs the item/lsiting id -->
+                        <input type="hidden" name="listing-id" value="{{ item.id }}">
+                            {% if user in item.watchList.all %}
+                                <button class="btn btn-danger" type="submit" name="watch" value="remove">Remove from watchlist</button>
+                            {% else %}
+                                <button class="btn btn-success" type="submit" name="watch" value="add">Add to watchlist</button>
+                            {% endif %}
+                    </form>
+
+                {% endif %}
             </div>
-          </div>
-          <br>
+        </div>
+        <br>
 
     {% endfor %}
 

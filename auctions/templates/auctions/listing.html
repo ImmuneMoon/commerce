@@ -13,10 +13,12 @@
             </div>
             <p class="m-3">{{ listing.price }}</p>
             <form class="d-flex flex-column">
-                <div class="input-group w-50 mw-25">
-                    <input type="number" class="form-control" step="any" required="" placeholder=" Bid">
-                    <button class="btn btn-primary" type="button">Place Bid</button>
-                </div>
+                {% if user.is_authenticated and user != listing.user %}
+                    <div class="input-group w-50 mw-25">
+                        <input type="number" class="form-control" step="any" required="" placeholder=" Bid">
+                        <button class="btn btn-primary" type="button">Place Bid</button>
+                    </div>
+                {% endif %}
             </form>
         </div>
         <div class="card-footer text-muted">
@@ -25,7 +27,71 @@
                 <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=listing.user %}">{{ listing.user }}</a></li>
                 <li class="nav-item">Category: <a class="nav-link" href="{% url 'auctions:category' cat=listing.category %}">{{ listing.category }}</a></li>
             </ul>
+
+            {% if user.is_authenticated and user != listing.user %}
+
+                <form action="{% url 'auctions:watchlist' %}" method="POST">
+                    {% csrf_token %}
+                    <!-- Grabs the page path -->
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <!-- Grabs the item/lsiting id -->
+                    <input type="hidden" name="listing-id" value="{{ item.id }}">
+                        {% if user in listing.watchList.all %}
+                            <button class="btn btn-danger" type="submit" name="watch" value="remove">Remove from watchlist</button>
+                        {% else %}
+                            <button class="btn btn-success" type="submit" name="watch" value="add">Add to watchlist</button>
+                        {% endif %}
+                </form>
+
+            {% endif %}
+
+            <div class="mt-5">
+                <h4 class="my-3">Comments</h4>
+                {% if user.is_authenticated %}
+                    <form class="m-5" action="{% url 'auctions:comment' lstng_id=listing.id %}" method="POST">
+                    {% csrf_token %}
+                        <!-- Grabs the page path -->
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <textarea rows="4" cols="50" name="new-comment" placeholder="Add a comment"></textarea>
+                        <br>
+                        <button class="btn btn-secondary mt-3" type="submit" name="comment-bttn" value="post">Post</button>
+                    </form>
+                {% endif %}
+
+                <div class="bg-white pt-3 pb-4 mt-5 mb-3">
+
+                    {% if comments %}
+                        {% for comment in comments %}
+
+                            <form class="ml-5 w-75" action="{% url 'auctions:comment' lstng_id=listing.id %}" method="POST">
+                                {% csrf_token %}
+                                <!-- Grabs the page path -->
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <!-- Grabs the comment id -->
+                                <input type="hidden" name="comment-id" value="{{ comment.id }}">
+                                <div>
+                                    <p name="author"><a class="nav-link" href="{% url 'auctions:user' uid=comment.commenter.id %}"><strong>{{ comment.commenter }}</strong></a></p>
+                                    <p class="ml-5" name="comment">{{ comment.comment }}</p>
+                                </div>
+                                {% if request.user == comment.commenter %}
+                                    <button class="btn btn-danger mt-5 ml-5" type="submit" name="comment-bttn" value="delete">Delete</button>
+                                {% endif %}
+
+                            </form>
+                            <div class="d-flex justify-center my-5">
+                                <div class="border border-grey w-75 mx-auto"></div>
+                            </div>
+
+                        {% endfor %}
+                    {% else %}
+
+                        <p class="ml-3">No Comments</p>
+
+                    {% endif %}
+
+                </div>                
+            </div>
         </div>
-      </div>
+    </div>
 
 {% endblock %}

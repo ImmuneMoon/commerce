@@ -8,7 +8,7 @@
 
         <div class="card">
             <div class="card-header">
-                <h3><a href="{% url 'auctions:listing' id=item.id%}">{{ item.title }}</a></h3>
+                <h3><a href="{% url 'auctions:listing' id=item.id %}">{{ item.title }}</a></h3>
             </div>
             <div id="listing-card-body" class="card-body">
                 <div class="d-flex">
@@ -22,6 +22,20 @@
                 <ul>
                     <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=item.user %}">{{ item.user }}</a></li>
                 </ul>
+                <form action="{% url 'auctions:watchlist' %}" method="POST">
+                    {% csrf_token %}
+                    <!-- Grabs the page path -->
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <!-- Grabs the item/lsiting id -->
+                    <input type="hidden" name="listing-id" value="{{ item.id }}">
+                    {% if user != item.user %}
+                        {% if user in item.watchList.all %}
+                            <button class="btn btn-danger" type="submit" name="watch" value="remove">Remove from watchlist</button>
+                        {% else %}
+                            <button class="btn btn-success" type="submit" name="watch" value="add">Add to watchlist</button>
+                        {% endif %}
+                    {% endif %}
+                </form>
             </div>
         </div>
         <br>

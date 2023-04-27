@@ -21,6 +21,18 @@
                     <li class="nav-item">Listed by: <a class="nav-link" href="">{{ item.user }}</a></li>
                     <li class="nav-item">Category: <a class="nav-link" href="">{{ item.category }}</a></li>
                 </ul>
+                <form action="{% url 'auctions:watchlist' %}" method="POST">
+                    {% csrf_token %}
+                    <!-- Grabs the page path -->
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <!-- Grabs the item/listing id -->
+                    <input type="hidden" name="listing-id" value="{{ item.id }}">
+                    {% if user in item.watchList.all %}
+                        <button class="btn btn-danger" type="submit" name="watch" value="remove">Remove from watchlist</button>
+                    {% else %}
+                        <button class="btn btn-success" type="submit" name="watch" value="add">Add to watchlist</button>
+                    {% endif %}
+                </form>
             </div>
         </div>
 
