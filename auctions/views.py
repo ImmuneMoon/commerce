@@ -174,12 +174,13 @@ def close_listing(request, lstng_id):
 def delete_listing(request, lstng_id):
     # Grabs the current user
     user = request.user
-    # Grabs the curr URL
-    next_url = request.POST.get('next', 'auctions/index.html')
     # Deletes listing
     Listing.objects.filter(user=user, pk=lstng_id).delete()
-    # Redirect
-    return redirect(next_url)
+    # Grabs active listings of all users and displays them if any exist
+    activeListings = Listing.objects.filter(active=True)
+    return render(request, "auctions/index.html", {
+        "activeListings" : activeListings
+    })
 
 
 def watchlist(request):
