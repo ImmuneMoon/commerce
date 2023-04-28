@@ -2,7 +2,7 @@
 
 {% block body %}
 
-    <h2>Watchlist ({{ watch_amount }})</h2>
+    <h2 class="m-3">Watchlist ({{ watch_amount }})</h2>
 
     {% for item in watchlist %}
 
@@ -13,13 +13,26 @@
             <div id="listing-card-body" class="card-body">
                 <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
                 <p class="card-text">{{ item.info }}</p>
-                <p class="m-3"><strong>Starting Bid:</strong> ${{ listing.price }}</p>
+                <p class="m-3"><strong>Starting Bid:</strong> ${{ item.price }}</p>
             </div>
             <div class="card-footer text-muted">
+
+                {% if listing.winner != "None" %}
+
+                    <h4>Auction Closed</h4>
+
+                    {% if user.username == item.winner %}
+
+                        <p>Congrats, you won!</p>
+
+                    {% endif %}
+
+                {% endif %}
+
                 <h4>Details</h4>
                 <ul>
-                    <li class="nav-item">Listed by: <a class="nav-link" href="">{{ item.user }}</a></li>
-                    <li class="nav-item">Category: <a class="nav-link" href="">{{ item.category }}</a></li>
+                    <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=item.user.id %}">{{ item.user }}</a></li>
+                    <li class="nav-item">Category: <a class="nav-link" href="{% url 'auctions:category' cat=item.category %}">{{ item.category }}</a></li>
                 </ul>
                 <form action="{% url 'auctions:watchlist' %}" method="POST">
                     {% csrf_token %}
@@ -37,6 +50,7 @@
                 </form>
             </div>
         </div>
+        <br>
 
     {% endfor %}
 

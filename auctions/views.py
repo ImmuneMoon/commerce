@@ -152,21 +152,17 @@ def listing(request, id):
     comments = Comment.objects.filter(listing=listingInfo)
     # Grabs the bids for the listing
     bids = Bid.objects.filter(auction=id).order_by('-bid')
-    # Grab winner if there is one
-    winner = Listing.winner
     # Passes the data to the listing page
     return render(request, "auctions/listing.html", {
         "listing" : listingInfo,
         "comments" : comments,
-        "bids" : bids,
-        "winner" : winner
+        "bids" : bids
     })
 
 
 def close_listing(request, lstng_id):
     next_url = request.POST.get('next', 'auctions/index.html')
     winner = request.POST["top-bidder"]
-    print('winner: ', winner)
     listing = Listing.objects.get(id=lstng_id)
     if request.method == 'POST':
         listing.active = False
@@ -225,14 +221,14 @@ def watchlist(request):
 def user(request, uid):
     # Gets the user's listings
     userListings = Listing.objects.filter(user=uid)
-    # Gets the user's active listings
-    activeListings = Listing.objects.filter(active=True, user=uid)
-    # Gets the username from the user id
-    userName = User.objects.get(pk=uid)
+    # Gets the listing's user
+    author = User.objects.get(pk=uid)
+    # Gets the current user
+    user = request.user
     return render(request, "auctions/user.html", {
         "userListings" : userListings,
-        "activeListings" : activeListings,
-        "user" : userName
+        "author" : author,
+        "user_prof" : user
     })
 
 def comment(request, lstng_id):
@@ -261,7 +257,7 @@ def bid(request, lstng_id):
     next_url = request.POST.get('next', 'auctions/index.html')
     bid_amount = request.POST["bid-input"]
     starting_bid = request.POST.get("start-price")
-    highest_bid = Bid.objects.aggregate(max_bid=Max('bid'))['max_bid']
+    highest_bid = Bid.objects.filter(auction_id=lstng_id).aggregate(max_bid=Max('bid'))['max_bid']
     
     if bid_amount is None:
         return render(request, "auctions/error.html", {

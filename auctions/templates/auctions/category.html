@@ -20,7 +20,7 @@
             <div class="card-footer text-muted">
                 <h4>Details</h4>
                 <ul>
-                    <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=item.user %}">{{ item.user }}</a></li>
+                    <li class="nav-item">Listed by: <a class="nav-link" href="{% url 'auctions:user' uid=item.user.id %}">{{ item.user }}</a></li>
                 </ul>
                 <form action="{% url 'auctions:watchlist' %}" method="POST">
                     {% csrf_token %}

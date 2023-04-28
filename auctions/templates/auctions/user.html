@@ -2,11 +2,19 @@
 
 {% block body %}
 
-    <h2>{{ user }}</h2>
+    {% for item in userListings %}
+
+        {% if forloop.counter == 1 %}
+
+            <h2 class="m-3">{{ item.user }}'s Listings</h2>
+
+        {% endif %}
+
+    {% endfor %}
 
     {% for item in userListings %}
         
-        {% if user == item.user %}
+        {% if user_prof.is_authenticated %}
 
             <div class="card">
                 <div class="card-header">
@@ -17,36 +25,95 @@
                         <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
                         <p class="card-text mx-5">{{ item.info }}</p>
                     </div>
-                    <p class="m-3"><strong>Starting Bid:</strong> ${{ listing.price }}</p>
+                    <p class="m-3"><strong>Starting Bid:</strong> ${{ item.price }}</p>
                 </div>
                 <div class="card-footer text-muted">
-                    <div class="m-3">
-                        <form action="{% url 'auctions:close_listing' lstng_id=item.id %}" method="POST">
-                            {% csrf_token %}
-                            <!-- Grabs the page path -->
-                            <input type="hidden" name="next" value="{{ request.path }}">
-    
-                            <div id="close-prompt">
-                                <p><strong>Are you sure?</strong><p>
-                                <button class="btn btn-primary" type="submit">Yes</button>
-                                <button class="btn btn-secondary" type="button" id="close-cancel">Cancel</button>
+
+                    {% if user_prof.is_authenticated and user_prof.id == author.id %}
+
+                        {% if item.winner == "None" %}
+                            <!-- CLOSE AUCTION -->
+                            <div class="m-3">
+                                <form action="{% url 'auctions:close_listing' lstng_id=item.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <!-- Grabs the page path -->
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    {% for bid in bids %}
+                                        {% if forloop.counter == 1 %}
+                                            <input type="hidden" name="top-bidder" value="{{ bid.bidder }}">
+                                        {% endif %}
+                                    {% endfor %}
+                                    <div id="close-{{ item.id }}-prompt">
+                                        <p><strong>Are you sure?</strong><p>
+                                        <button class="btn btn-primary" type="submit">Yes</button>
+                                        <button class="btn btn-secondary" type="button" id="close-{{ item.id }}-cancel">Cancel</button>
+                                    </div>
+                                </form>
+                                <button class="btn btn-success" type="button" id="close-{{ item.id }}">Close Auction</button>
                             </div>
-                        </form>
-                        <button class="btn btn-success" type="button" id="close">Close Auction</button>
-                    </div>
-                    <div class="m-3">
+                        {% else %}
+
+                            <div id="close-{{ item.id }}-prompt" class="d-none"></div>
+                            <div id="close-{{ item.id }}-cancel" class="d-none"></div>
+                            <div id="close-{{ item.id }}" class="d-none"></div>
+
+                        {% endif %}
+
+                    {% endif %}
+
+                    {% if item.winner != "None" %}
+
+                        <h4>Listing Closed</h4>
+
+                        {% if user.username == item.winner %}
+
+                            <p>Congrats, you won!</p>
+
+                        {% endif %}
+
+                    {% endif %}
+                    
+                    <h4>Details</h4>
+                    <ul>
+                        <li class="nav-item">Category: <a class="nav-link" href="{% url 'auctions:category' cat=item.category %}">{{ item.category }}</a></li>
+                    </ul>
+                    {% if user_prof.is_authenticated and user_prof.id == author.id %}
+                    
+                        <!-- DELETE LISTING -->
+                        <div class="m-3">
                         <form action="{% url 'auctions:delete_listing' lstng_id=item.id %}" method="POST">
                             {% csrf_token %}
                             <!-- Grabs the page path -->
                             <input type="hidden" name="next" value="{{ request.path }}">
-                            <div id="prompt">
+        
+                            <div id="del-{{ item.id }}-prompt">
                                 <p><strong>Are you sure?</strong><p>
                                 <button class="btn btn-primary" type="submit">Yes</button>
-                                <button class="btn btn-secondary" type="button" id="cancel">Cancel</button>
+                                <button class="btn btn-secondary" type="button" id="del-{{ item.id }}-cancel">Cancel</button>
                             </div>
                         </form>
-                        <button type="button" class="btn btn-danger" id="delete">Delete Listing</button>
+                        <button type="button" class="btn btn-danger" id="del-{{ item.id }}">Delete Listing</button>
+                        </div>
+
+                    {% endif %}
+                </div>
+            </div>
+            <br>
+
+        {% else %}
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><a href="{% url 'auctions:listing' id=item.id %}">{{ item.title }}</a></h3>
+                </div>
+                <div id="listing-card-body" class="card-body">
+                    <div class="d-flex">
+                        <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
+                        <p class="card-text mx-5">{{ item.info }}</p>
                     </div>
+                    <p class="m-3">{{ item.price }}</p>
+                </div>
+                <div class="card-footer text-muted">
                     <h4>Details</h4>
                     <ul>
                         <li class="nav-item">Category: <a class="nav-link" href="{% url 'auctions:category' cat=item.category %}">{{ item.category }}</a></li>
@@ -55,65 +122,59 @@
             </div>
             <br>
 
-        {% else %}
-
-            {% for active in activeListings %}
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3><a href="{% url 'auctions:listing' id=active.id %}">{{ active.title }}</a></h3>
-                    </div>
-                    <div id="listing-card-body" class="card-body">
-                        <div class="d-flex">
-                            <img src={{ active.imageURL }} loading="lazy" alt={{ active.title }}>
-                            <p class="card-text mx-5">{{ active.info }}</p>
-                        </div>
-                        <p class="m-3">{{ active.price }}</p>
-                    </div>
-                    <div class="card-footer text-muted">
-                        <h4>Details</h4>
-                        <ul>
-                            <li class="nav-item">Category: <a class="nav-link" href="{% url 'auctions:category' cat=active.category %}">{{ active.category }}</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <br>
-
-            {% endfor %}
-
         {% endif %}
 
     {% endfor %}
-    <script>
 
-        // Close Auction
-        const closeBttn = document.getElementById("close");
-        const cancelClose = document.getElementById("close-cancel");
-        const closePrompt = document.getElementById("close-prompt")
-        closePrompt.style.display = "none";
-        closeBttn.addEventListener("click", () => {
-            closeBttn.style.display = "none";
-            closePrompt.style.display = "block";
-        });
-        cancelClose.addEventListener("click", () => {
-            closeBttn.style.display = "block";
-            closePrompt.style.display = "none";
-        });
 
-        // Delete Listing
-        const deleteBttn = document.getElementById("delete");
-        const cancelDelete = document.getElementById("del-cancel");
-        const deletePrompt = document.getElementById("del-prompt")
-        deletePrompt.style.display = "none";
-        deleteBttn.addEventListener("click", () => {
-            deleteBttn.style.display = "none";
-            deletePrompt.style.display = "block";
-        });
-        cancelDelete.addEventListener("click", () => {
-            deleteBttn.style.display = "block";
-            deletePrompt.style.display = "none";
-        });
-        
-    </script>
+    {% if user_prof.is_authenticated and user_prof.id == author.id %}
+
+        <script>
+
+            
+            {% for item in userListings %}
+                // Close Auction
+                const closeBttn{{ item.id }} = document.getElementById(`close-${"{{ item.id }}"}`);
+                const cancelClose{{ item.id }} = document.getElementById(`close-${"{{ item.id }}"}-cancel`);
+                const closePrompt{{ item.id }} = document.getElementById(`close-${"{{ item.id }}"}-prompt`);
+
+                closePrompt{{ item.id }}.classList.add('d-none');
+
+                closeBttn{{ item.id }}.addEventListener('click', () => {
+                    closePrompt{{ item.id }}.classList.remove('d-none');
+                    cancelClose{{ item.id }}.classList.remove('d-none');
+                    closeBttn{{ item.id }}.classList.add('d-none');
+                });
+                
+                cancelClose{{ item.id }}.addEventListener('click', () => {
+                    closePrompt{{ item.id }}.classList.add('d-none');
+                    cancelClose{{ item.id }}.classList.add('d-none');
+                    closeBttn{{ item.id }}.classList.remove('d-none');
+                });
+
+                // Delete Auction
+                const delBttn{{ item.id }} = document.getElementById(`del-${"{{ item.id }}"}`);
+                const cancelDel{{ item.id }} = document.getElementById(`del-${"{{ item.id }}"}-cancel`);
+                const delPrompt{{ item.id }} = document.getElementById(`del-${"{{ item.id }}"}-prompt`);
+                
+                delPrompt{{ item.id }}.classList.add('d-none');
+
+                delBttn{{ item.id }}.addEventListener('click', () => {
+                    delPrompt{{ item.id }}.classList.remove('d-none');
+                    cancelDel{{ item.id }}.classList.remove('d-none');
+                    delBttn{{ item.id }}.classList.add('d-none');
+                });
+                
+                cancelDel{{ item.id }}.addEventListener('click', () => {
+                    delPrompt{{ item.id }}.classList.add('d-none');
+                    cancelDel{{ item.id }}.classList.add('d-none');
+                    delBttn{{ item.id }}.classList.remove('d-none');
+                });
+                
+            {% endfor %}
+
+        </script>
+
+    {% endif %}
 
 {% endblock %}
