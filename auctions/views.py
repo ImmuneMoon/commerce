@@ -3,15 +3,16 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.db.models import Max
 
-from .models import User, Listing, Category, Comment
+from .models import User, Listing, Category, Comment, Bid
 
 import sqlite3
 
 db = sqlite3.connect('db.sqlite3')
 
 def index(request):
-    # Grabs active listings and displays them if any exist
+    # Grabs active listings of all users and displays them if any exist
     activeListings = Listing.objects.filter(active=True)
     return render(request, "auctions/index.html", {
         "activeListings" : activeListings
@@ -147,13 +148,42 @@ def category(request, cat):
 def listing(request, id):
     # Grabs the listing from the given id
     listingInfo = Listing.objects.get(pk=id)
-    # Passes the listing to the listing page
+    # Grabs the comments for the listing
     comments = Comment.objects.filter(listing=listingInfo)
-    print('comments', comments)
+    # Grabs the bids for the listing
+    bids = Bid.objects.filter(auction=id).order_by('-bid')
+    # Grab winner if there is one
+    winner = Listing.winner
+    # Passes the data to the listing page
     return render(request, "auctions/listing.html", {
         "listing" : listingInfo,
-        "comments" : comments
+        "comments" : comments,
+        "bids" : bids,
+        "winner" : winner
     })
+
+
+def close_listing(request, lstng_id):
+    next_url = request.POST.get('next', 'auctions/index.html')
+    winner = request.POST["top-bidder"]
+    print('winner: ', winner)
+    listing = Listing.objects.get(id=lstng_id)
+    if request.method == 'POST':
+        listing.active = False
+        listing.winner = winner
+        listing.save()
+        return redirect(next_url)
+
+
+def delete_listing(request, lstng_id):
+    # Grabs the current user
+    user = request.user
+    # Grabs the curr URL
+    next_url = request.POST.get('next', 'auctions/index.html')
+    # Deletes listing
+    Listing.objects.filter(user=user, pk=lstng_id).delete()
+    # Redirect
+    return redirect(next_url)
 
 
 def watchlist(request):
@@ -161,18 +191,19 @@ def watchlist(request):
     user = request.user
     # Pulls the users watchlist by searching listings that have the user in their watchlist
     watch_list = Listing.objects.filter(watchList=user)
+    # Gets the amount of items in watchlist
+    watch_amount = len(watch_list)
     # Gets the current page's URL, if the current page cant be redirected to, the user is redirected to index instead
     next_url = request.POST.get('next', 'auctions/index.html')
     # Renders the watchlist page on GET and passes the user's list
     if request.method == "GET":
         return render(request, "auctions/watchlist.html", {
-            "watchlist" : watch_list
+            "watchlist" : watch_list,
+            "watch_amount" : watch_amount
         })
     else:
-        print("request", request.POST)
         # Otherwise, the listing id is grabbed from it's invisible input
         listingId = request.POST.get("listing-id")
-        print("listingID", listingId)
         # The pushed button's value is grabbed from it's invisible input
         watchBttn = request.POST.get("watch")
         # Grabs the listing information using the id
@@ -193,11 +224,14 @@ def watchlist(request):
 # For rendering the user's profile
 def user(request, uid):
     # Gets the user's listings
-    userListings = Listing.objects.filter(active=True, user=uid)
+    userListings = Listing.objects.filter(user=uid)
+    # Gets the user's active listings
+    activeListings = Listing.objects.filter(active=True, user=uid)
     # Gets the username from the user id
     userName = User.objects.get(pk=uid)
     return render(request, "auctions/user.html", {
         "userListings" : userListings,
+        "activeListings" : activeListings,
         "user" : userName
     })
 
@@ -222,4 +256,27 @@ def comment(request, lstng_id):
         comment.delete()
         return redirect(next_url)
 
-
+def bid(request, lstng_id):
+    user = request.user
+    next_url = request.POST.get('next', 'auctions/index.html')
+    bid_amount = request.POST["bid-input"]
+    starting_bid = request.POST.get("start-price")
+    highest_bid = Bid.objects.aggregate(max_bid=Max('bid'))['max_bid']
+    
+    if bid_amount is None:
+        return render(request, "auctions/error.html", {
+                "error": "Please enter a bid amount."
+            })
+    elif float(bid_amount) <= float(starting_bid):
+        return render(request, "auctions/error.html", {
+                "error": "Please enter an amount greater than the starting bid."
+            })
+    elif highest_bid is not None and float(bid_amount) <= highest_bid:
+        return render(request, "auctions/error.html", {
+                "error": "Please enter an amount greater than the current highest bid."
+            })
+    else:
+        listing = Listing.objects.get(pk=lstng_id)
+        new_bid = Bid(bidder=user, bid=bid_amount, auction=listing)
+        new_bid.save()
+        return redirect(next_url)

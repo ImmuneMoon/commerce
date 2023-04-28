@@ -15,7 +15,7 @@
                     <img src={{ item.imageURL }} loading="lazy" alt={{ item.title }}>
                     <p class="card-text mx-5">{{ item.info }}</p>
                 </div>
-                <p class="m-3">{{ item.price }}</p>
+                <p class="m-3"><strong>Starting Bid:</strong> ${{ item.price }}</p>
             </div>
             <div class="card-footer text-muted">
                 <h4>Details</h4>
@@ -33,7 +33,7 @@
                         <!-- Grabs the item/lsiting id -->
                         <input type="hidden" name="listing-id" value="{{ item.id }}">
                             {% if user in item.watchList.all %}
-                                <button class="btn btn-danger" type="submit" name="watch" value="remove">Remove from watchlist</button>
+                                <button class="btn btn-warning" type="submit" name="watch" value="remove">Remove from watchlist</button>
                             {% else %}
                                 <button class="btn btn-success" type="submit" name="watch" value="add">Add to watchlist</button>
                             {% endif %}

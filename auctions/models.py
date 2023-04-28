@@ -20,6 +20,7 @@ class Listing(models.Model):
     active = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True, related_name="category")
     watchList = models.ManyToManyField(User, blank=True, related_name="watchlist")
+    winner = models.CharField(max_length=50, default="None")
 
     def __str__(self) -> str:
         return self.title
@@ -32,3 +33,11 @@ class Comment(models.Model):
 
     def __str__(self) -> str:
         return f"{self.commenter} comment on {self.listing}"
+    
+class Bid(models.Model):
+    bidder = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="bidder")
+    bid = models.DecimalField(default=0, max_digits=12, decimal_places=2)
+    auction = models.ForeignKey(Listing, on_delete=models.CASCADE, blank=True, null=True, related_name="auction")
+
+    def __str__(self) -> str:
+        return self.bid
