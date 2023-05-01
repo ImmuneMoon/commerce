@@ -30,7 +30,7 @@
                     <input type="hidden" name="listing-id" value="{{ item.id }}">
                     {% if user != item.user %}
                         {% if user in item.watchList.all %}
-                            <button class="btn btn-danger" type="submit" name="watch" value="remove">Remove from watchlist</button>
+                            <button class="btn btn-warning" type="submit" name="watch" value="remove">Remove from watchlist</button>
                         {% else %}
                             <button class="btn btn-success" type="submit" name="watch" value="add">Add to watchlist</button>
                         {% endif %}
